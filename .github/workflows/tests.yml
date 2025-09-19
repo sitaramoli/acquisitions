@@ -1,0 +1,70 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        env:
+          NODE_ENV: test
+          NODE_OPTIONS: --experimental-vm-modules
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'sqlite://test.db' }}
+        run: |
+          echo "Running tests..."
+          if npm test; then
+            echo "test_result=success" >> $GITHUB_ENV
+            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "test_result=failure" >> $GITHUB_ENV
+            echo "❌ Some tests failed!" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Test failures detected. Please check the test output above."
+            exit 1
+          fi
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports-${{ github.run_id }}
+          path: |
+            coverage/
+            *.coverage
+            coverage.json
+            coverage.xml
+          retention-days: 30
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "## Test Results 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.test_result }}" = "success" ]; then
+            echo "- **Status**: ✅ PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environment**: Node.js 20.x" >> $GITHUB_STEP_SUMMARY
+            echo "- **Coverage**: Reports uploaded as artifacts" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ❌ FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environment**: Node.js 20.x" >> $GITHUB_STEP_SUMMARY
+            echo "- **Action Required**: Check test failures above" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 **Test artifacts are available for 30 days**" >> $GITHUB_STEP_SUMMARY
