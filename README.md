@@ -143,7 +143,7 @@ Start the production server:
 ```bash
   # Run all tests
   npm test
-  
+
 # Run tests with coverage
   npm test -- --coverage
 ```
@@ -151,6 +151,7 @@ Start the production server:
 ### Test Environment
 
 Tests run with the following environment variables:
+
 - `NODE_ENV=test`
 - `NODE_OPTIONS=--experimental-vm-modules`
 - `DATABASE_URL` (configured for test database)
@@ -228,6 +229,7 @@ acquisitions/
 ### Multi-stage Build
 
 The project includes a multi-stage Dockerfile with:
+
 - **Base stage**: Common setup and production dependencies
 - **Development stage**: Development dependencies and watch mode
 - **Production stage**: Optimized for production deployment
@@ -269,23 +271,25 @@ Configure these secrets in your GitHub repository:
 ### Manual Deployment
 
 1. **Build Docker image**:
+
 ```bash
    docker build --target production -t acquisitions:latest .
-   ```
+```
 
 2. **Run container**:
+
 ```bash
    docker run -p 3000:3000 --env-file .env.production acquisitions:latest
-   ```
+```
 
 ## 📝 Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `PORT` | Server port | No | `3000` |
-| `NODE_ENV` | Environment mode | No | `development` |
-| `LOG_LEVEL` | Logging level | No | `info` |
-| `DATABASE_URL` | PostgreSQL connection string | Yes | - |
+| Variable       | Description                  | Required | Default       |
+| -------------- | ---------------------------- | -------- | ------------- |
+| `PORT`         | Server port                  | No       | `3000`        |
+| `NODE_ENV`     | Environment mode             | No       | `development` |
+| `LOG_LEVEL`    | Logging level                | No       | `info`        |
+| `DATABASE_URL` | PostgreSQL connection string | Yes      | -             |
 
 ## 🤝 Contributing
 
